@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Login</title>
+</head>
+<body>
+  <h1>Login</h1>
+  <form id="login_form">
+    <p id="error_msg" style="color:red;"></p>
+    <label>Username: <input id="username" type="text" name="username" required></label><br><br>
+    <label>Password: <input id="password" name="password" required></label><br><br>
+    <button type="submit">Log in</button>
+  </form>
+
+
+  <script>
+    const uN = document.getElementById("username")
+    const pW = document.getElementById("password")
+    const form = document.getElementById("login_form")
+
+    const errorMsg = document.getElementById("error_msg")
+    async function submit(username,password){
+        try{
+        const res = await fetch('/login',{
+            method: 'POST',
+            headers:{'Content-Type': 'application/json'},
+            body: JSON.stringify({ username, password })
+        });
+
+        if(res.ok){
+            localStorage.setItem('auth',true)
+            console.log("are we here?")
+            window.location.href = '/admin'
+        }
+      else {
+        const text = await res.text();
+        errorMsg.textContent = text || "Incorrect username or password";
+      }
+        }
+
+        catch(err){
+            console.error("Error", err.message)
+        }
+        
+    }
+    form.addEventListener('submit',(event) =>{
+        event.preventDefault()
+        submit(uN.value,pW.value)
+    })
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <h1>Admin Dashboard</h1>
+    <button id="logout">Logout</button>
+    <div id="message"></div>
+    <dl id="reports">
+
+    </dl>
+    
+    <script>
+      if(localStorage.getItem('auth') !== 'true'){
+        window.location.href = '/login'
+      }
+      const logoutButton = document.getElementById("logout")
+      const message = document.getElementById('message');
+
+      window.onload = () =>{
+        loadReports()
+      }
+      async function logout(){
+        try{
+          const res = await fetch('/logout',{method: 'POST'})
+          if (res.ok){
+            window.location.href = '/login'
+          }
+        }
+        catch(error){
+          console.error(error);
+        }
+      }
+      logoutButton.addEventListener('click',()=> logout())
+      async function loadReports(){
+        try{
+          const res = await fetch('/api/reports');
+          if (!res.ok) throw new Error('Server responded with error');
+          const data = await res.json();
+          displayReports(data)
+        }
+        catch(err){
+          message.textContent = "Error loading reports, try again."
+        console.error(err);
+        }
+      }
+      async function deleteAction(reportElement){
+        try{
+          console.log(reportElement.id)
+          const res = await fetch(`/api/reports/${reportElement.id}`, {method: 'DELETE'});
+          if (!res.ok) throw new Error('Server responded with an error');
+          reportElement.remove()
+        }
+        catch(err){
+          console.error('Failed to delete report:', err.message || err);
+        }
+
+      }
+      function displayReports(reports){
+        const rep = document.getElementById("reports")
+        for(let i = 0; i < reports.length; i++){
+          const newTitle = document.createElement("dt")
+          newTitle.id = reports[i].id;
+          const newDescription = document.createElement("dd")
+          const deleteButton = document.createElement("button")
+
+          deleteButton.textContent = "Delete"
+          deleteButton.addEventListener('click', () =>deleteAction(newTitle))
+          newTitle.textContent = reports[i].title
+          newDescription.textContent = reports[i].description
+          newTitle.appendChild(newDescription)
+          newTitle.appendChild(deleteButton)
+          rep.appendChild(newTitle)
+
+        }
+      }
+
+      
+    </script>
+  </body>
+</html>
