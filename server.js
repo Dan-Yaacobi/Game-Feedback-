@@ -6,6 +6,7 @@ const cors = require('cors');
 const { getAllReports } = require('./db');
 const { saveReport } = require('./db');
 const { deleteReport } = require('./db');
+const sendEmail = require('./utlities/mailer')
 
 const app = express();
 // Middleware
@@ -74,10 +75,13 @@ app.post('/login',(req,res,next) =>{
 
 app.post('/api/reports', async (req,res) => {
   try{
-    const {title,description,tags} = req.body    
-    const savedReport = await saveReport(title, description, tags);
+    const {title,description,email} = req.body   
+    const savedReport = await saveReport(title, description);
     res.status(201).json(savedReport);
-
+    sendEmail(process.env.NOTIFICATION_EMAIL,`Incoming new bug: ${title}`,description)
+    if(email){
+      sendEmail(email, `Thank you for your feedback`,'Just got your feedback, the world is now a little better with your help.\nAppreciate you,\nDan and his team (there is no team).')
+    }
   }
   catch (err) {
     console.error('POST /api/reports failed:', err);

@@ -3,13 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <title>Submit Bug Report</title>
+  <style>
+  .required-star {
+    color: red;
+    margin-left: 4px;
+  }
+</style>
 </head>
 <body>
   <h1>Submit a Bug Report</h1>
   <form id="bugForm">
-    <label>Title: <input type="text" name="title" required></label><br><br>
-    <label>Description: <textarea name="description" required></textarea></label><br><br>
-    <label>Tags (comma separated): <input type="text" name="tags"></label><br><br>
+    <label><span class="required-star">*</span>Title <input type="text" name="title" required></label><br><br>
+    <label> <span class="required-star">*</span>Description: <textarea name="description" required></textarea></label><br><br>
+    <label>Email: <input type="text" name="email"></label><br><br>
     <button type="submit">Submit Bug</button>
   </form>
 
@@ -25,14 +31,13 @@
       const formData = new FormData(form);
       const title = formData.get('title');
       const description = formData.get('description');
-      const tagsRaw = formData.get('tags');
-      const tags = tagsRaw ? tagsRaw.split(',').map(t => t.trim()).filter(t => t !== '') : [];
+      const email = formData.get('email');
 
       try {
         const res = await fetch('/api/reports', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, description, tags })
+          body: JSON.stringify({ title, description, email })
         });
 
         if (!res.ok) throw new Error('Server responded with error');
@@ -40,6 +45,7 @@
 
         message.textContent = `Bug #${data.id} submitted!`;
         form.reset();
+
       } catch (err) {
         message.textContent = 'Failed to submit bug. Check console.';
         console.error(err);
